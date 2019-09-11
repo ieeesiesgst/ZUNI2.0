@@ -1,16 +1,19 @@
-//MATRIX CODE
+// vipul-08 is a god \m/
+
 
 #include <WiFiUdp.h>
 #include <ESP8266WiFi.h>
+#include<Servo.h>
 
+Servo myservo;
 
-#define p1 D1 
-#define p2 D2 
-#define p3 D3 
-#define p4 D4 
-#define p5 D0
+#define m1 D0 
+#define m2 D1 
+#define m3 D2 
+#define m4 D3 
+#define b1 D4
 
-const char* ssid = "harsh"; //Enter your wifi network SSID
+const char* ssid = "sneaky-beaver"; //Enter your wifi network SSID
 const char* password ="12345678"; //Enter your wifi network password
 
 
@@ -19,19 +22,33 @@ const int BAUD_RATE = 115200;
 
 byte incomingByte = 0;
 
-bool playerA = false;
-bool playerB = false;
-bool playerC = false;
-bool playerD = false;
-bool resetAll = false;
+bool forwardsPressed = false;
+bool backwardsPressed = false;
+bool rightPressed = false;
+bool leftPressed = false;
 
-bool set = false;
+bool forwardLeftPressed = false;
+bool forwardRightPressed = false;
 
-const int A_PRESSED = 49;
-const int B_PRESSED = 50;
-const int C_PRESSED = 51;
-const int D_PRESSED = 52;
-const int RESET_PRESSED = 53;
+bool backwardLeftPressed = false;
+bool backwardRightPressed = false;
+
+bool buttonPressed = false;
+
+const int RIGHT_PRESSED = 49;
+const int FORWARD_RIGHT_PRESSED = 50;
+const int FORWARDS_PRESSED = 51;
+const int FORWARD_LEFT_PRESSED = 52;
+const int LEFT_PRESSED = 53;
+const int BACKWARD_LEFT_PRESSED = 54;
+const int BACKWARDS_PRESSED = 55;
+const int BACKWARD_RIGHT_PRESSED = 56;
+
+const int U_RESET = 57;
+
+const int BUTTON_PRESSED = 9;
+const char BUTTON_RELEASED = 0;
+
 
 byte packetBuffer[512];
 
@@ -39,11 +56,13 @@ WiFiUDP Udp;
 IPAddress ip;
 
 void initOutputs() {
-  pinMode(p1,OUTPUT);
-  pinMode(p2,OUTPUT);
-  pinMode(p3,OUTPUT);
-  pinMode(p4,OUTPUT);
-  pinMode(p5,OUTPUT);
+  pinMode(m1,OUTPUT);
+  pinMode(m2,OUTPUT);
+  pinMode(m3,OUTPUT);
+  pinMode(m4,OUTPUT);
+  pinMode(b1,OUTPUT);
+  digitalWrite(b1,LOW);
+ 
 }
 
 void connectWifi() {
@@ -62,82 +81,234 @@ void connectWifi() {
   Serial.println(ip);
 }
 
+void moveForwards() {
+  Serial.println("Forward");
+  analogWrite(m1,1024);
+  analogWrite(m2,0);
+  analogWrite(m3,1024);
+  analogWrite(m4,0);
+}
+
+void moveBackwards() {
+  Serial.println("Backwards");
+  analogWrite(m1,0);
+  analogWrite(m2,1024);
+  analogWrite(m3,0);
+  analogWrite(m4,1024);
+}
+
+void turnRight() {
+  Serial.println("Hard Right");
+  analogWrite(m1,1024);
+  analogWrite(m2,0);
+  analogWrite(m3,0);
+  analogWrite(m4,1024);
+}
+
+void turnLeft() {
+  Serial.println("Hard Left");
+  analogWrite(m1,0);
+  analogWrite(m2,1024);
+  analogWrite(m3,1024);
+  analogWrite(m4,0);
+}
+
+
+void softLeftF()
+{
+  Serial.println("Soft Left F");
+  analogWrite(m1,0);
+  analogWrite(m2,0);
+  analogWrite(m3,1024);
+  analogWrite(m4,0);
+}
+
+void softLeftB()
+{
+  Serial.println("Soft left B");
+  analogWrite(m1,0);
+  analogWrite(m2,0);
+  analogWrite(m3,0);
+  analogWrite(m4,1024);
+}
+
+void softRightF()
+{
+  Serial.println("Soft Right F");
+  analogWrite(m1,1024);
+  analogWrite(m2,0);
+  analogWrite(m3,0);
+  analogWrite(m4,0);
+}
+void softRightB()
+{
+  Serial.println("Soft Right B");
+  analogWrite(m1,0);
+  analogWrite(m2,1024);
+  analogWrite(m3,0);
+  analogWrite(m4,0);
+}
+void gunControl() {
+  Serial.println("Button On");
+  digitalWrite(b1,HIGH);
+}
+
+void gunReset(){
+  Serial.println("Button Off");
+  digitalWrite(b1,LOW);
+}
+
+void resetSteering() {
+  Serial.println("reset s");
+}
+
+void resetEngine() {
+  Serial.println("reset e");
+  analogWrite(m1,0);
+  analogWrite(m2,0);
+  analogWrite(m3,0);
+  analogWrite(m4,0);
+}
+
 void detectKeyPresses() {
-    if (incomingByte == A_PRESSED) {
-      playerA = true;
-      playerB = false;
-      playerC = false;
-      playerD = false;
-      resetAll = false;
+    if (incomingByte == FORWARDS_PRESSED) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = true;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
     }
-    else if (incomingByte == B_PRESSED) {
-      playerA = false;
-      playerB = true;
-      playerC = false;
-      playerD = false;
-      resetAll = false;
+    else if (incomingByte == BACKWARDS_PRESSED) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = true;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
     }
-    else if (incomingByte == C_PRESSED) {
-      playerA = false;
-      playerB = false;
-      playerC = true;
-      playerD = false;
-      resetAll = false;
+    else if (incomingByte == RIGHT_PRESSED) {
+      leftPressed = false;
+      rightPressed = true;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
     }
-    else if (incomingByte == D_PRESSED) {
-      playerA = false;
-      playerB = false;
-      playerC = false;
-      playerD = true;
-      resetAll = false;
+    else if (incomingByte == LEFT_PRESSED) {
+      leftPressed = true;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
     }
-    else if(incomingByte == RESET_PRESSED) {
-      playerA = false;
-      playerB = false;
-      playerC = false;
-      playerD = false;
-      resetAll = true;
+    else if(incomingByte == FORWARD_LEFT_PRESSED) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = true;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
     }
+    else if(incomingByte == BACKWARD_LEFT_PRESSED) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = true;
+      backwardRightPressed = false;
+    }
+    else if(incomingByte == FORWARD_RIGHT_PRESSED) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = true;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
+    }
+    else if(incomingByte == BACKWARD_RIGHT_PRESSED) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = true;
+    }
+    else if(incomingByte == U_RESET) {
+      leftPressed = false;
+      rightPressed = false;
+      forwardsPressed = false;
+      backwardsPressed = false;
+      forwardLeftPressed = false;
+      forwardRightPressed = false;
+      backwardLeftPressed = false;
+      backwardRightPressed = false;
+    }
+    
 }
 
 void handlePinOutputs() {
-  if (playerA == true && set == false) 
+  if (forwardsPressed == true) 
   { 
-    digitalWrite(p1,HIGH);
-    digitalWrite(p5,HIGH);
-    Serial.println("Player1");
-    set = true;
+      moveForwards();
   }
-  else if (playerB == true && set == false) 
+  else if (backwardsPressed == true) 
   {
-    digitalWrite(p2,HIGH);
-    digitalWrite(p5,HIGH);
-    Serial.println("Player2");
-    set = true;
+    moveBackwards();
   }
-  else if(playerC == true && set == false)
+  else if(rightPressed == true)
   {
-    digitalWrite(p3,HIGH);
-    digitalWrite(p5,HIGH);
-    Serial.println("Player3");
-    set = true;
+    turnRight();
   }
-  else if(playerD == true && set == false)
+  else if(leftPressed == true)
   {
-    digitalWrite(p4,HIGH);
-    digitalWrite(p5,HIGH);
-    Serial.println("Player4");
-    set = true;
+    turnLeft();
   }
-  else if(resetAll == true )
+  else if(forwardLeftPressed == true)
   {
-    digitalWrite(p1,LOW);
-    digitalWrite(p2,LOW);
-    digitalWrite(p3,LOW);
-    digitalWrite(p4,LOW);
-    digitalWrite(p5,LOW);
-    Serial.println("Reset");
-    set = false;
+    softLeftF();
+  }
+  else if(backwardLeftPressed == true)
+  {
+    softLeftB();
+  }
+  else if(forwardRightPressed == true)
+  {
+    softRightF();
+  }
+  else if(backwardRightPressed == true)
+  {
+    softRightB();
+  }
+  else {
+    resetEngine();
+  }
+
+
+  if(buttonPressed == true) 
+  {
+    gunControl();
+  }
+  else if(buttonPressed == false) 
+  {
+    gunReset();
   }
 }
 
@@ -191,4 +362,5 @@ void loop() {
     detectKeyPresses();
     handlePinOutputs();
   }
+  
 }
