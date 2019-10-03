@@ -6,23 +6,7 @@
 #include<Servo.h>
 
 Servo myservo;
-
-
-bool forwardsPressed = false;
-bool backwardsPressed = false;
-bool rightPressed = false;
-bool leftPressed = false;
-
-bool forwardLeftPressed = false;
-bool forwardRightPressed = false;
-
-bool backwardLeftPressed = false;
-bool backwardRightPressed = false;
-
-bool buttonPressed = false;
-
-const int RIGHT_PRESSED = 49;
-const int FORWARD_RIGHT_PRESSED = 50;
+\const int FORWARD_RIGHT_PRESSED = 50;
 const int FORWARDS_PRESSED = 51;
 const int FORWARD_LEFT_PRESSED = 52;
 const int LEFT_PRESSED = 53;
