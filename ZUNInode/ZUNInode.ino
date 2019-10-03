@@ -7,20 +7,6 @@
 
 Servo myservo;
 
-#define m1 D0 
-#define m2 D1 
-#define m3 D2 
-#define m4 D3 
-#define b1 D4
-
-const char* ssid = "sneaky-beaver"; //Enter your wifi network SSID
-const char* password ="12345678"; //Enter your wifi network password
-
-
-const int SERVER_PORT = 1111;
-const int BAUD_RATE = 115200;
-
-byte incomingByte = 0;
 
 bool forwardsPressed = false;
 bool backwardsPressed = false;
